@@ -1,0 +1,35 @@
+{
+  "name": "icon-tool",
+  "version": "1.0.0",
+  "description": "图标转换工具 - 将 PNG/JPG 转换为多尺寸 ICO 文件",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.icontool.app",
+    "productName": "图标转换工具",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "app-icon.ico",
+      "signAndEditExecutable": false
+    },
+    "portable": {
+      "artifactName": "图标转换工具.exe"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "icon-tool.html",
+      "app-icon.ico"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

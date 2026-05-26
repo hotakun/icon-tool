@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图标生成器</title>
+<style>
+  body { background: #0A0A0F; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 20px; }
+  canvas { border: 1px solid #333; border-radius: 12px; }
+  button { background: #8B5CF6; color: white; border: none; padding: 14px 32px; border-radius: 12px; font-size: 16px; cursor: pointer; }
+  button:hover { background: #7c3aed; }
+  p { color: #aaa; font-size: 14px; text-align: center; max-width: 400px; line-height: 1.6; }
+  .preview { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .preview div { text-align: center; }
+  .preview span { display: block; margin-top: 8px; color: #aaa; font-size: 12px; }
+</style>
+</head>
+<body>
+<h2>🎵 正在生成图标…</h2>
+<div class="preview">
+  <div><canvas id="c192" width="192" height="192"></canvas><span>192×192</span></div>
+  <div><canvas id="c512" width="512" height="512"></canvas><span>512×512</span></div>
+</div>
+<button onclick="downloadIcons()">📥 下载图标文件</button>
+<p>图标下载后，请把它们和 music-player.html 放在同一个文件夹里</p>
+
+<script>
+function drawIcon(canvas) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const cx = w / 2, cy = h / 2;
+  const size = w * 0.35;
+
+  // 背景
+  const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, w * 0.7);
+  bg.addColorStop(0, '#1A1A2E');
+  bg.addColorStop(1, '#0A0A0F');
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, w, h, [w * 0.1]);
+  ctx.fill();
+
+  // 外圈光晕
+  ctx.beginPath();
+  ctx.arc(cx, cy, size, 0, Math.PI * 2);
+  const glow = ctx.createRadialGradient(cx, cy, size * 0.5, cx, cy, size);
+  glow.addColorStop(0, 'rgba(139, 92, 246, 0.6)');
+  glow.addColorStop(0.7, 'rgba(139, 92, 246, 0.2)');
+  glow.addColorStop(1, 'rgba(139, 92, 246, 0)');
+  ctx.fillStyle = glow;
+  ctx.fill();
+
+  // 主圆形
+  ctx.beginPath();
+  ctx.arc(cx, cy, size * 0.85, 0, Math.PI * 2);
+  const grad = ctx.createLinearGradient(cx - size, cy - size, cx + size, cy + size);
+  grad.addColorStop(0, '#8B5CF6');
+  grad.addColorStop(0.5, '#A78BFA');
+  grad.addColorStop(1, '#EC4899');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // 音符符号（简化）
+  ctx.fillStyle = 'white';
+  ctx.font = `${size * 0.9}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('♪', cx, cy + size * 0.05);
+
+  // 三个小频谱条
+  const barW = size * 0.08;
+  const gap = size * 0.12;
+  const barH = [size * 0.5, size * 0.75, size * 0.55];
+  const startX = cx - (barW + gap);
+  for (let i = 0; i < 3; i++) {
+    const x = startX + i * (barW + gap);
+    const hh = barH[i];
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath();
+    ctx.roundRect(x - barW/2, cy + size * 0.35 - hh, barW, hh, [barW/2]);
+    ctx.fill();
+  }
+}
+
+function downloadIcons() {
+  function download(canvas, filename) {
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  }
+  download(document.getElementById('c192'), 'icon-192.png');
+  download(document.getElementById('c512'), 'icon-512.png');
+}
+
+drawIcon(document.getElementById('c192'));
+drawIcon(document.getElementById('c512'));
+
+// roundRect polyfill
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if (typeof r === 'number') r = { tl: r, tr: r, br: r, bl: r };
+    this.beginPath(); this.moveTo(x + r.tl, y); this.lineTo(x + w - r.tr, y);
+    this.quadraticCurveTo(x + w, y, x + w, y + r.tr); this.lineTo(x + w, y + h - r.br);
+    this.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h); this.lineTo(x + r.bl, y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - r.bl); this.lineTo(x, y + r.tl);
+    this.quadraticCurveTo(x, y, x + r.tl, y); this.closePath();
+  };
+}
+</script>
+</body>
+</html>
